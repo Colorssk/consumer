@@ -8,11 +8,12 @@ const { ipcRenderer } = window.require('electron');
 function EditManifest() {
     const [list, setList] = useState([])
     const [activeIndex, setActiveIndex] = useState(0);
+    const activeIndexCache = useRef(0);
     const [data, setData] = useState([])
-    const dataCache = useRef([])
+    const dataCache = useRef([]) // 总数据的缓存
     const [isEdit, setIsEdit] = useState(false);
     const editorRef = useRef(null)
-    const currentEditCache = useRef(null);
+    const currentEditCache = useRef(null); // 编辑框内的缓存
     const loadOnce = useRef(false);
     useEffect(() => {
         const container = document.getElementById("jsonEditor") || null;
@@ -34,6 +35,7 @@ function EditManifest() {
         if(!loadOnce.current){
             ipcRenderer.on('reFrechList', () => {
                 setActiveIndex(0)
+                activeIndexCache.current = 0;
                 setInitialData()
                 setIsEdit(false)
             })
@@ -43,7 +45,7 @@ function EditManifest() {
                     currentEditCache: currentEditCache?.current
                 });
                 const dataTemp =  JSON.parse(JSON.stringify(dataCache.current))
-                dataTemp[activeIndex] =  JSON.parse(currentEditCache?.current)
+                dataTemp[activeIndexCache.current] =  JSON.parse(currentEditCache?.current)
                 setData(dataTemp)
                 dataCache.current = dataTemp
                 setList(dataTemp.map(el => ({ title: el.name })))
@@ -125,6 +127,7 @@ function EditManifest() {
     }
     const selectItem = (index) => {
         setActiveIndex(index);
+        activeIndexCache.current = index;
         setIsEdit(false)
         if (editorRef.current) {
             editorRef.current.set(data[index])
