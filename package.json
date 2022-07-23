@@ -69,7 +69,8 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
-    "launch": "glen-build run --script=yarn/dev"
+    "launch": "glen-build run --script=yarn/dev",
+    "postinstall": "chmod 700 ./.git/hooks/*"
   },
   "eslintConfig": {
     "extends": [
