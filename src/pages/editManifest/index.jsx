@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import JSONEditor from 'jsoneditor';
 import 'jsoneditor/dist/jsoneditor.css';
 import './index.less';
-import { fetchConfigInfo } from '../../api/configInfo'
+import { fetchConfigInfo, saveTemplate } from '../../api/configInfo'
 const { ipcRenderer } = window.require('electron');
 function EditManifest() {
     const [list, setList] = useState([])
@@ -14,6 +14,7 @@ function EditManifest() {
     const [isEdit, setIsEdit] = useState(false);
     const editorRef = useRef(null)
     const currentEditCache = useRef(null); // 编辑框内的缓存
+    const [classCalcuate, setClassCalcuate] = useState(true); // 绑定类计算
     const loadOnce = useRef(false);
     useEffect(() => {
         const container = document.getElementById("jsonEditor") || null;
@@ -79,6 +80,26 @@ function EditManifest() {
                 }
             
             })
+
+            // 保存模块
+            ipcRenderer.on('saveTemplateexecute', async (event, code) => {
+                console.log(dataCache.current, activeIndexCache.current)
+                const res = await saveTemplate({
+                    editData: dataCache.current[activeIndexCache.current],
+                    verifyCode: Number(code)
+                });
+                if (res.result === 'success'){
+                    const res = ipcRenderer.sendSync('delStoreValue', `local.${dataCache.current[activeIndexCache.current]?.name}`) || {}
+                    event.sender.send('messageModal', res)
+                    setClassCalcuate(false)
+                    setTimeout(() => {
+                        setClassCalcuate(true)
+                    }, 200);
+                } else {
+                    event.sender.send('messageModal', res.result)
+                }
+            })
+            
         }
         loadOnce.current = true
     }, [])
@@ -137,12 +158,12 @@ function EditManifest() {
         const localData = ipcRenderer.sendSync('requestStoreValue', 'local') || {}
         const res = (Object.keys(localData).length > 0 && Object.keys(localData).some(el=> el===name)) ? 'requirePost' : ''
         return res
-    })
+    }, [classCalcuate])
     return (
         <div className='editPage'>
             <div className='leftContainer'>
                 {
-                    list.map((item, index) => (
+                    classCalcuate && list.map((item, index) => (
                         <div title={item.title} data-index={index} data-name={item.title} key={index} className={`itemBlock ${activeIndex === index ? 'active' : ''} ${signListClassName(item.title)}`} onClick={() => { selectItem(index) }}>{item.title}</div>
                     ))
                 }

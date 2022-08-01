@@ -9,7 +9,28 @@ const menuTemplate = ({ isPost }) => {
     return [{
         label: '复制'
     }, isPost && {
-        label: '提交'
+        label: '提交',
+        click: () => {
+            const urlNewModuleLocation = isDev ? 'http://localhost:3000/saveConfirm' : 'platformUrl';
+            newModuleModalWindow= null;
+            newModuleModalWindow = new BrowserWindow({
+                width: 500,
+                height: 500,
+                webPreferences: {
+                    nodeIntegration: true,
+                    contextIsolation: false,
+                    enableRemoteModule: true,
+                },
+                parent: mainwindow,
+                modal: true,
+                momodalable: true,
+                hasShadow: true,
+                titlestring: 'verify confirm submit'
+            });
+            newModuleModalWindow.setMenu(null);
+            newModuleModalWindow.loadURL(urlNewModuleLocation);
+            // newModuleModalWindow.webContents.openDevTools();
+        }
     }].filter(el => el)
 }
 // 构建菜单项
@@ -148,16 +169,23 @@ app.on('ready', () => {
     ipcMain.on('requestStoreValue', (event, key) => {
         event.returnValue = store.get(key);
       });
+    // renderer process 删除本地缓存
+    ipcMain.on('delStoreValue', (event, key) => {
+        store.delete(key);
+        event.returnValue = `del local ${key} successfully`
+    });
     // 显示弹窗提示
     ipcMain.on('messageModal', (event, value) => {
         dialog.showMessageBox(mainwindow,{title: 'info', message: value})
 
     })
     // 关闭弹窗
-    ipcMain.on('closeModal', (event, name) => {
+    ipcMain.on('closeModal', (event, res) => {
         if(newModuleModalWindow){
             newModuleModalWindow.close();
-            mainwindow.webContents.send('newModuleExecute', name)
+            if(res.eventName){
+                mainwindow.webContents.send(res.eventName, res.value);
+            } 
         }
     })
     console.log(app.getPath('userData'))

@@ -12,7 +12,7 @@ function NewModuleModal(){
         } else {
            // post fetch
            // close modal
-           ipcRenderer.send('closeModal', res)
+           ipcRenderer.send('closeModal', {value: res, eventName: 'newModuleExecute'})
         }
     }
     const onChangeValue = (e) => {
