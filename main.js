@@ -3,6 +3,7 @@ const { app, BrowserWindow, dialog } = require('electron');
 const isDev = require('electron-is-dev');
 const { Menu, ipcMain } = require('electron');
 const path = require("path");
+const url  = require('url');
 let mainwindow, newModuleModalWindow;
 // 菜单模板
 const menuTemplate = ({ isPost }) => {
@@ -11,7 +12,17 @@ const menuTemplate = ({ isPost }) => {
     }, isPost && {
         label: '提交',
         click: () => {
-            const urlNewModuleLocation = isDev ? 'http://localhost:3000/saveConfirm' : 'platformUrl';
+            let urlNewModuleLocation
+            if (isDev) {
+                urlNewModuleLocation = 'http://localhost:3000#/saveConfirm';
+            } else {
+                urlNewModuleLocation = url.format({
+                    pathname: path.join(__dirname, './build/index.html'),
+                    protocol: 'file:',
+                    slashes: false,
+                    hash: '/saveConfirm'
+                });
+            }
             newModuleModalWindow= null;
             newModuleModalWindow = new BrowserWindow({
                 width: 500,
@@ -83,7 +94,17 @@ app.on('ready', () => {
             submenu: [
                 {
                     label: 'new module', accelerator: 'Shift+CmdOrCtrl+N', click: function (item, focusedWindow) {
-                        const urlNewModuleLocation = isDev ? 'http://localhost:3000/newModuleModal' : 'platformUrl';
+                        let urlNewModuleLocation
+                        if (isDev) {
+                            urlNewModuleLocation = 'http://localhost:3000#/newModuleModal';
+                        } else {
+                            urlNewModuleLocation = url.format({
+                                pathname: path.join(__dirname, './build/index.html'),
+                                protocol: 'file:',
+                                slashes: false,
+                                hash: '/newModuleModal'
+                            });
+                        }
                         newModuleModalWindow = new BrowserWindow({
                             width: 500,
                             height: 500,
@@ -100,7 +121,7 @@ app.on('ready', () => {
                         });
                         newModuleModalWindow.setMenu(null);
                         newModuleModalWindow.loadURL(urlNewModuleLocation);
-                        newModuleModalWindow.webContents.openDevTools();
+                        // newModuleModalWindow.webContents.openDevTools();
                     }
                 }
             ]
@@ -112,7 +133,7 @@ app.on('ready', () => {
                     label: 'pc code standards',
                     accelerator: 'Shift+CmdOrCtrl+I',
                     click: function (item, focusedWindow) {
-                        const urlNewModuleLocation = isDev ? 'https://www.yuque.com/docs/share/b8db93a3-006d-4560-b948-a63d4cd0b112?# 《项目技术规范》' : 'platformUrl';
+                        const urlNewModuleLocation = 'https://www.yuque.com/docs/share/b8db93a3-006d-4560-b948-a63d4cd0b112?# 《项目技术规范》';
                         newModuleModalWindow = new BrowserWindow({
                             useContentSize: true,
                             webPreferences: {
@@ -128,7 +149,7 @@ app.on('ready', () => {
                         });
                         newModuleModalWindow.setMenu(null);
                         newModuleModalWindow.loadURL(urlNewModuleLocation);
-                        newModuleModalWindow.webContents.openDevTools();
+                        // newModuleModalWindow.webContents.openDevTools();
                     }
                 }
             ]
@@ -189,7 +210,17 @@ app.on('ready', () => {
         }
     })
     console.log(app.getPath('userData'))
-    const urlLocation = isDev ? 'http://localhost:3000' : 'platformUrl';
+    let urlLocation;
+    if (isDev) {
+        urlLocation = 'http://localhost:3000/';
+    } else {
+        urlLocation = url.format({
+            pathname: path.join(__dirname, './build/index.html'),
+            protocol: 'file:',
+            slashes: false,
+            hash: '/'
+        });
+    }
     mainwindow.loadURL(urlLocation)
-    mainwindow.webContents.openDevTools();
+    // mainwindow.webContents.openDevTools();
 });

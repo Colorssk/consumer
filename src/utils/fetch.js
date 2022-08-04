@@ -9,7 +9,7 @@ axios.interceptors.request.use(
     const token = store.get('token');
     const loadingConfig = store.get('loadingConfig')
     if (process.env.NODE_ENV !== 'development') {
-      config.url = config.url.replace('api/', '');
+      config.url = config.url.replace('/api/', 'http://121.37.162.212:7001/');
     }
     // 自动置入token
     if (config.url.search('/login') === -1) {
