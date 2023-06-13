@@ -151,6 +151,29 @@ app.on('ready', () => {
                         newModuleModalWindow.loadURL(urlNewModuleLocation);
                         // newModuleModalWindow.webContents.openDevTools();
                     }
+                },
+                {
+                    label: 'grayscalePlatform',
+                    accelerator: 'Shift+CmdOrCtrl+Y',
+                    click: function (item, focusedWindow) {
+                        const urlNewModuleLocation = 'http://121.37.162.212:18088/';
+                        newModuleModalWindow = new BrowserWindow({
+                            useContentSize: true,
+                            webPreferences: {
+                                nodeIntegration: true,
+                                contextIsolation: false,
+                                enableRemoteModule: true,
+                            },
+                            parent: focusedWindow,
+                            modal: true,
+                            momodalable: true,
+                            hasShadow: true,
+                            titlestring: 'code standards'
+                        });
+                        newModuleModalWindow.setMenu(null);
+                        newModuleModalWindow.loadURL(urlNewModuleLocation);
+                        // newModuleModalWindow.webContents.openDevTools();
+                    }
                 }
             ]
         }
